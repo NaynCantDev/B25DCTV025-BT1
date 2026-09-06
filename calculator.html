@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Máy tính JavaScript</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .calculator {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            width: 300px;
+        }
+
+        .display {
+            background-color: #222;
+            color: white;
+            font-size: 2rem;
+            text-align: right;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            min-height: 60px;
+            word-break: break-all;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 18px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #555;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #666;
+        }
+
+        button:active {
+            background-color: #444;
+        }
+
+        .btn-operator {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-operator:hover {
+            background-color: #e67e22;
+        }
+
+        .btn-function {
+            background-color: #95a5a6;
+            color: #333;
+        }
+
+        .btn-function:hover {
+            background-color: #bdc3c7;
+        }
+
+        .btn-equals {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-equals:hover {
+            background-color: #2ecc71;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            color: #555;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="index.html" class="back-link">← Quay về</a>
+
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+
+        <div class="buttons">
+            <button class="btn-function" onclick="clearAll()">AC</button>
+            <button class="btn-function" onclick="toggleSign()">+/-</button>
+            <button class="btn-function" onclick="percent()">%</button>
+            <button class="btn-operator" onclick="setOperator('/')">÷</button>
+
+            <button onclick="inputDigit('7')">7</button>
+            <button onclick="inputDigit('8')">8</button>
+            <button onclick="inputDigit('9')">9</button>
+            <button class="btn-operator" onclick="setOperator('*')">×</button>
+
+            <button onclick="inputDigit('4')">4</button>
+            <button onclick="inputDigit('5')">5</button>
+            <button onclick="inputDigit('6')">6</button>
+            <button class="btn-operator" onclick="setOperator('-')">−</button>
+
+            <button onclick="inputDigit('1')">1</button>
+            <button onclick="inputDigit('2')">2</button>
+            <button onclick="inputDigit('3')">3</button>
+            <button class="btn-operator" onclick="setOperator('+')">+</button>
+
+            <button class="btn-zero" onclick="inputDigit('0')">0</button>
+            <button onclick="inputDecimal()">.</button>
+            <button class="btn-equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        // Biến lưu trạng thái máy tính
+        var currentValue = '0';
+        var previousValue = '';
+        var operator = null;
+        var resetDisplay = false;
+
+        var display = document.getElementById('display');
+
+        // Hiển thị giá trị lên màn hình
+        function updateDisplay() {
+            display.textContent = currentValue;
+        }
+
+        // Nhập số
+        function inputDigit(digit) {
+            if (resetDisplay) {
+                currentValue = digit;
+                resetDisplay = false;
+            } else {
+                if (currentValue === '0') {
+                    currentValue = digit;
+                } else {
+                    currentValue = currentValue + digit;
+                }
+            }
+            updateDisplay();
+        }
+
+        // Nhập dấu chấm thập phân
+        function inputDecimal() {
+            if (resetDisplay) {
+                currentValue = '0.';
+                resetDisplay = false;
+                updateDisplay();
+                return;
+            }
+            if (currentValue.indexOf('.') === -1) {
+                currentValue = currentValue + '.';
+            }
+            updateDisplay();
+        }
+
+        // Chọn phép tính
+        function setOperator(op) {
+            if (operator && !resetDisplay) {
+                calculate();
+            }
+            previousValue = currentValue;
+            operator = op;
+            resetDisplay = true;
+        }
+
+        // Tính kết quả
+        function calculate() {
+            if (!operator || !previousValue) return;
+
+            var prev = parseFloat(previousValue);
+            var current = parseFloat(currentValue);
+            var result;
+
+            if (operator === '+') {
+                result = prev + current;
+            } else if (operator === '-') {
+                result = prev - current;
+            } else if (operator === '*') {
+                result = prev * current;
+            } else if (operator === '/') {
+                if (current === 0) {
+                    currentValue = 'Lỗi';
+                    operator = null;
+                    previousValue = '';
+                    resetDisplay = true;
+                    updateDisplay();
+                    return;
+                }
+                result = prev / current;
+            }
+
+            // Làm tròn để tránh lỗi số thập phân
+            result = Math.round(result * 1000000000) / 1000000000;
+            currentValue = result.toString();
+            operator = null;
+            previousValue = '';
+            resetDisplay = true;
+            updateDisplay();
+        }
+
+        // Xóa tất cả
+        function clearAll() {
+            currentValue = '0';
+            previousValue = '';
+            operator = null;
+            resetDisplay = false;
+            updateDisplay();
+        }
+
+        // Đổi dấu +/-
+        function toggleSign() {
+            if (currentValue !== '0') {
+                if (currentValue.charAt(0) === '-') {
+                    currentValue = currentValue.substring(1);
+                } else {
+                    currentValue = '-' + currentValue;
+                }
+                updateDisplay();
+            }
+        }
+
+        // Tính phần trăm
+        function percent() {
+            var value = parseFloat(currentValue);
+            currentValue = (value / 100).toString();
+            updateDisplay();
+        }
+
+        // Hỗ trợ bàn phím
+        document.addEventListener('keydown', function (e) {
+            if (e.key >= '0' && e.key <= '9') {
+                inputDigit(e.key);
+            } else if (e.key === '+') {
+                setOperator('+');
+            } else if (e.key === '-') {
+                setOperator('-');
+            } else if (e.key === '*') {
+                setOperator('*');
+            } else if (e.key === '/') {
+                e.preventDefault();
+                setOperator('/');
+            } else if (e.key === '.' || e.key === ',') {
+                inputDecimal();
+            } else if (e.key === 'Enter' || e.key === '=') {
+                calculate();
+            } else if (e.key === 'Escape') {
+                clearAll();
+            } else if (e.key === 'Backspace') {
+                if (!resetDisplay && currentValue.length > 1) {
+                    currentValue = currentValue.slice(0, -1);
+                } else {
+                    currentValue = '0';
+                }
+                updateDisplay();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
